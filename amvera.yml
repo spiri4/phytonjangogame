@@ -8,6 +8,6 @@ build:
   useCache: true
 run:
   scriptName: manage.py
-  command: null
+  command: runserver
   persistenceMount: /data
   containerPort: "80"
