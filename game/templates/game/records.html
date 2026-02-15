@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Таблица рекордов — цИфИрки</title>
+    <style>
+        :root {
+            --bg: #1a1b26;
+            --surface: #24283b;
+            --text: #c0caf5;
+            --muted: #565f89;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        a { color: #7dcfff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back { display: inline-block; margin-bottom: 1.5rem; }
+        h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+        table { border-collapse: collapse; width: 100%; max-width: 480px; }
+        th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--muted); }
+        th { color: var(--muted); font-weight: 500; }
+        .empty { color: var(--muted); margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <a href="{% url 'game:play' %}" class="back">← К игре</a>
+    <h1>Таблица рекордов</h1>
+    <p>До 10 лучших результатов (меньше рядов — лучше).</p>
+    {% if records %}
+    <table>
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Имя</th>
+                <th>Дата победы</th>
+                <th>Рядов</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ r.winner_name }}</td>
+                <td>{{ r.victory_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ r.row_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty">Пока нет записей.</p>
+    {% endif %}
+</body>
+</html>

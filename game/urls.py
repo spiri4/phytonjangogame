@@ -9,4 +9,6 @@ urlpatterns = [
     path('rules/', views.rules_view, name='rules'),
     path('about/', views.about_view, name='about'),
     path('author/', views.author_view, name='author'),
+    path('records/', views.records_view, name='records'),
+    path('record-win/', views.record_win_view, name='record_win'),
 ]

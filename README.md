@@ -17,7 +17,7 @@ Open **http://127.0.0.1:8000/** in your browser.
 
 1. Click a digit to select it (it turns green).
 2. Click another digit to try to cross the pair out. Valid pairs: same digit or digits that sum to 10, and they must be adjacent (or connected by already crossed-out cells).
-3. Use the menu: **Начать заново** (start over), **Продолжить** (remove full rows and continue), **Проверить, есть ли что стереть**, **Отменить последнее зачеркивание** (undo last pair).
+3. Use the menu: **Начать заново** (start over), **Продолжить** (remove full rows and continue), **Проверить, есть ли что зачеркнуть**, **Отменить последнее зачеркивание** (undo last pair).
 
 ---
 

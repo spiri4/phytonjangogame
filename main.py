@@ -259,7 +259,7 @@ action_menu = Menu(menu_bar)
 menu_bar.add_cascade(label='Действия', menu=action_menu)
 action_menu.add_command(label='Начать заново', command=create_initial_content)
 action_menu.add_command(label='Продолжить', command=continue_app)
-action_menu.add_command(label='Проверить есть ли что стереть', command=check_to_del)
+action_menu.add_command(label='Проверить есть ли что зачеркнуть', command=check_to_del)
 action_menu.add_command(label='Отменить последнее зачеркивание', command=cancel_last_strike)
 action_menu.add_command(label='Выход', command=quit_app)
 

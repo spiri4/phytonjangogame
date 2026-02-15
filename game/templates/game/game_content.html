@@ -7,58 +7,38 @@
     <form class="js-game-form" method="post" action="{% url 'game:action' %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="check_del">
-        <button type="submit">Проверить, есть ли что стереть</button>
+        <button type="submit" {% if won %}disabled{% endif %}>Проверить, есть ли что зачеркнуть</button>
     </form>
     <form class="js-game-form" method="post" action="{% url 'game:action' %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="continue">
-        <button type="submit">Продолжить</button>
+        <button type="submit" {% if won %}disabled{% endif %}>Продолжить</button>
     </form>
     <form class="js-game-form" method="post" action="{% url 'game:action' %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="undo">
-        <button type="submit">Отменить последнее зачеркивание</button>
+        <button type="submit" {% if won %}disabled{% endif %}>Отменить последнее зачеркивание</button>
     </form>
 </nav>
 
 <div class="main-row">
     <div class="grid-wrap">
-        <div class="grid">
-            {% for cell in cells %}
-            <div class="cell state-{{ cell.state }} {% if selected_index == cell.index %}selected{% endif %} {% if cell.index in prompted_indices %}prompted{% endif %}"
-                 data-index="{{ cell.index }}"
-                 data-state="{{ cell.state }}">
-                {% if cell.state == '2' %}
-                    <span>0</span>
-                {% else %}
-                    {% if selected_index is not None %}
-                        {% if selected_index == cell.index %}
-                            <form class="cell-form js-game-form" method="post" action="{% url 'game:action' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="clear_selection">
-                                <button type="submit" class="cell-btn">{{ cell.text }}</button>
-                            </form>
-                        {% else %}
-                            <form class="cell-form js-game-form" method="post" action="{% url 'game:action' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="strike">
-                                <input type="hidden" name="i0" value="{{ selected_index }}">
-                                <input type="hidden" name="i1" value="{{ cell.index }}">
-                                <button type="submit" class="cell-btn">{{ cell.text }}</button>
-                            </form>
-                        {% endif %}
+        <form class="js-game-form grid-form" method="post" action="{% url 'game:action' %}">
+            {% csrf_token %}
+            <div class="grid">
+                {% for cell in cells %}
+                <div class="cell state-{{ cell.state }} {% if selected_index == cell.index %}selected{% endif %} {% if cell.index in prompted_indices %}prompted{% endif %}"
+                     data-index="{{ cell.index }}"
+                     data-state="{{ cell.state }}">
+                    {% if cell.state == '2' %}
+                        <span>0</span>
                     {% else %}
-                        <form class="cell-form js-game-form" method="post" action="{% url 'game:action' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="select">
-                            <input type="hidden" name="index" value="{{ cell.index }}">
-                            <button type="submit" class="cell-btn">{{ cell.text }}</button>
-                        </form>
+                        <button type="submit" name="cell" value="{{ cell.index }}" class="cell-btn">{{ cell.text }}</button>
                     {% endif %}
-                {% endif %}
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
+        </form>
     </div>
     {% if messages %}
     <ul class="messages">
@@ -71,4 +51,12 @@
 
 {% if won %}
 <p class="won">Поздравляю, вы выиграли!</p>
+{% if pending_win_rows is not None %}
+<form class="record-win-form" method="post" action="{% url 'game:record_win' %}">
+    {% csrf_token %}
+    <label for="winner_name">Записать в таблицу рекордов:</label>
+    <input type="text" id="winner_name" name="winner_name" maxlength="200" placeholder="Имя героя" required>
+    <button type="submit">Записать</button>
+</form>
+{% endif %}
 {% endif %}
