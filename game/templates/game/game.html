@@ -62,6 +62,7 @@
             --grid-inner: calc(9 * var(--cell-size) + 8 * 2px);
             --grid-wrap-width: calc(var(--grid-inner) + 2rem);
             align-items: start;
+            min-width: min-content;
         }
         .grid-wrap {
             grid-column: 2;
@@ -70,6 +71,11 @@
             padding: 1rem;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .main-row-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
         }
         .grid {
             display: grid;
