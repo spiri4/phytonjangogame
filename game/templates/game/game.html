@@ -38,9 +38,12 @@
             padding: 0;
             margin: 0;
             max-width: 320px;
-            position: absolute;
-            left: calc(50% + var(--grid-wrap-width) / 2 + 1rem);
-            top: 0;
+            grid-column: 3;
+            align-self: start;
+            position: sticky;
+            top: 1rem;
+            max-height: min(100%, calc(100vh - 2rem));
+            overflow-y: auto;
         }
         .messages li {
             padding: 0.5rem 0.75rem;
@@ -53,14 +56,15 @@
         .messages .warning { background: rgba(224, 175, 104, 0.2); color: #e0af68; }
         .messages .info { background: rgba(125, 207, 255, 0.15); color: #7dcfff; }
         .main-row {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: 1fr var(--grid-wrap-width) 1fr;
+            column-gap: 0.5rem;
             --grid-inner: calc(9 * var(--cell-size) + 8 * 2px);
             --grid-wrap-width: calc(var(--grid-inner) + 2rem);
+            align-items: start;
         }
         .grid-wrap {
+            grid-column: 2;
             width: var(--grid-wrap-width);
             background: var(--surface);
             padding: 1rem;
@@ -189,79 +193,41 @@
         <a href="{% url 'game:author' %}">Об авторе</a>
     </nav>
 
-    <nav class="menu" aria-label="Действия">
-        <form method="post" action="{% url 'game:action' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="start_over">
-            <button type="submit">Начать заново</button>
-        </form>
-        <form method="post" action="{% url 'game:action' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="check_del">
-            <button type="submit">Проверить, есть ли что стереть</button>
-        </form>
-        <form method="post" action="{% url 'game:action' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="continue">
-            <button type="submit">Продолжить</button>
-        </form>
-        <form method="post" action="{% url 'game:action' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="undo">
-            <button type="submit">Отменить последнее зачеркивание</button>
-        </form>
-    </nav>
-
-    <div class="main-row">
-        <div class="grid-wrap">
-            <div class="grid">
-                {% for cell in cells %}
-                <div class="cell state-{{ cell.state }} {% if selected_index == cell.index %}selected{% endif %} {% if cell.index in prompted_indices %}prompted{% endif %}"
-                     data-index="{{ cell.index }}"
-                     data-state="{{ cell.state }}">
-                    {% if cell.state == '2' %}
-                        <span>0</span>
-                    {% else %}
-                        {% if selected_index is not None %}
-                            {% if selected_index == cell.index %}
-                                <form class="cell-form" method="post" action="{% url 'game:action' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="clear_selection">
-                                    <button type="submit" class="cell-btn">{{ cell.text }}</button>
-                                </form>
-                            {% else %}
-                                <form class="cell-form" method="post" action="{% url 'game:action' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="strike">
-                                    <input type="hidden" name="i0" value="{{ selected_index }}">
-                                    <input type="hidden" name="i1" value="{{ cell.index }}">
-                                    <button type="submit" class="cell-btn">{{ cell.text }}</button>
-                                </form>
-                            {% endif %}
-                        {% else %}
-                            <form class="cell-form" method="post" action="{% url 'game:action' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="select">
-                                <input type="hidden" name="index" value="{{ cell.index }}">
-                                <button type="submit" class="cell-btn">{{ cell.text }}</button>
-                            </form>
-                        {% endif %}
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+    <div id="game-content">
+        {% include "game/game_content.html" %}
     </div>
 
-    {% if won %}
-    <p class="won">Поздравляю, вы выиграли!</p>
-    {% endif %}
+    <script>
+    (function() {
+        var actionUrl = "{% url 'game:action' %}";
+        document.addEventListener('submit', function(e) {
+            var form = e.target;
+            if (!form || !form.classList || !form.classList.contains('js-game-form')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var fd = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', actionUrl);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data && data.html) {
+                            var el = document.getElementById('game-content');
+                            if (el) el.innerHTML = data.html;
+                            if (history.replaceState) history.replaceState({}, '', "{% url 'game:play' %}");
+                            return;
+                        }
+                    } catch (err) {}
+                }
+                window.location.href = "{% url 'game:play' %}";
+            };
+            xhr.onerror = function() { window.location.href = "{% url 'game:play' %}"; };
+            xhr.send(fd);
+        }, true);
+    })();
+    </script>
 </body>
 </html>

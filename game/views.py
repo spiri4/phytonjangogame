@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
+from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
@@ -30,6 +32,22 @@ def _save_state(request, texts, clicked, cancel=None):
         request.session[SESSION_CANCEL] = cancel
 
 
+def _ajax_response(request):
+    texts, clicked, cancel = _get_state(request)
+    won = logic.check_win(clicked)
+    selected = request.session.get(SESSION_SELECTED)
+    prompted = set(request.session.get(SESSION_PROMPTED) or [])
+    cells = [{'index': i, 'text': t, 'state': c} for i, (t, c) in enumerate(zip(texts, clicked))]
+    html = render_to_string('game/game_content.html', {
+        'cells': cells,
+        'cols': 9,
+        'won': won,
+        'selected_index': selected,
+        'prompted_indices': prompted,
+    }, request=request)
+    return JsonResponse({'html': html})
+
+
 @require_GET
 def rules_view(request):
     return render(request, 'game/info_page.html', {
@@ -41,7 +59,7 @@ def rules_view(request):
             <li>Либо цифры, дающие в сумме 10 (например, 2 и 8, 4 и 6)</li>
         </ul>
         <p>Пара должна быть «рядом»: по горизонтали или вертикали, без других активных цифр между ними (уже зачёркнутые не мешают).</p>
-        <p>Выберите первую цифру (она подсветится), затем нажмите вторую — пара зачеркнётся. Меню «Продолжить» убирает пустые ряды и добавляет новые. Цель — зачеркнуть все цифры.</p>
+        <p>Выберите первую цифру (она подсветится), затем нажмите вторую — пара зачеркнётся. Меню «Продолжить» дописывает все незачёркнутые цифры в конец. Цель — зачеркнуть все цифры.</p>
         ''',
     })
 
@@ -99,6 +117,8 @@ def action_view(request):
         if SESSION_PROMPTED in request.session:
             del request.session[SESSION_PROMPTED]
         messages.success(request, 'Поехали.')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
     if action == 'continue':
@@ -112,11 +132,15 @@ def action_view(request):
             if SESSION_PROMPTED in request.session:
                 del request.session[SESSION_PROMPTED]
             messages.success(request, 'Игра начата заново, а то было слишком много кнопок без шансов их все зачеркнуть')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return _ajax_response(request)
             return redirect('game:play')
         cancel = [[-1, ''], [-1, '']]
         _save_state(request, texts, clicked, cancel)
         if SESSION_PROMPTED in request.session:
             del request.session[SESSION_PROMPTED]
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
     if action == 'check_del':
@@ -128,6 +152,8 @@ def action_view(request):
             if SESSION_PROMPTED in request.session:
                 del request.session[SESSION_PROMPTED]
             messages.warning(request, 'Стирать больше нечего. Нажмите «Продолжить».')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
     if action == 'undo':
@@ -139,6 +165,8 @@ def action_view(request):
             messages.success(request, msg)
         else:
             messages.error(request, msg)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
     if action == 'select':
@@ -150,6 +178,8 @@ def action_view(request):
             request.session[SESSION_SELECTED] = idx
         if SESSION_PROMPTED in request.session:
             del request.session[SESSION_PROMPTED]
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
     if action == 'clear_selection':
@@ -157,6 +187,8 @@ def action_view(request):
             del request.session[SESSION_SELECTED]
         if SESSION_PROMPTED in request.session:
             del request.session[SESSION_PROMPTED]
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
     if action == 'strike':
@@ -165,6 +197,8 @@ def action_view(request):
             i1 = int(request.POST.get('i1'))
         except (ValueError, TypeError):
             messages.error(request, 'Выберите две ячейки.')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return _ajax_response(request)
             return redirect('game:play')
         if SESSION_SELECTED in request.session:
             del request.session[SESSION_SELECTED]
@@ -178,6 +212,10 @@ def action_view(request):
                 messages.success(request, 'Поздравляю, вы выиграли!')
         else:
             messages.error(request, msg)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return _ajax_response(request)
         return redirect('game:play')
 
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return _ajax_response(request)
     return redirect('game:play')
