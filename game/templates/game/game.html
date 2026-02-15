@@ -38,12 +38,9 @@
             padding: 0;
             margin: 0;
             max-width: 320px;
-            grid-column: 3;
-            align-self: start;
-            position: sticky;
-            top: 1rem;
-            max-height: min(100%, calc(100vh - 2rem));
-            overflow-y: auto;
+            position: absolute;
+            left: calc(50% + var(--grid-wrap-width) / 2 + 1rem);
+            top: 0;
         }
         .messages li {
             padding: 0.5rem 0.75rem;
@@ -56,26 +53,19 @@
         .messages .warning { background: rgba(224, 175, 104, 0.2); color: #e0af68; }
         .messages .info { background: rgba(125, 207, 255, 0.15); color: #7dcfff; }
         .main-row {
-            display: grid;
-            grid-template-columns: 1fr var(--grid-wrap-width) 1fr;
-            column-gap: 0.5rem;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             --grid-inner: calc(9 * var(--cell-size) + 8 * 2px);
             --grid-wrap-width: calc(var(--grid-inner) + 2rem);
-            align-items: start;
-            min-width: min-content;
         }
         .grid-wrap {
-            grid-column: 2;
             width: var(--grid-wrap-width);
             background: var(--surface);
             padding: 1rem;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        .main-row-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: visible;
         }
         .grid {
             display: grid;
