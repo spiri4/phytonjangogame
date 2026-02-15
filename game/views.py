@@ -30,6 +30,44 @@ def _save_state(request, texts, clicked, cancel=None):
         request.session[SESSION_CANCEL] = cancel
 
 
+@require_GET
+def rules_view(request):
+    return render(request, 'game/info_page.html', {
+        'title': 'Правила игры',
+        'content': '''
+        <p>Зачеркивайте пары цифр по правилам:</p>
+        <ul>
+            <li>Одинаковые цифры (например, 3 и 3)</li>
+            <li>Либо цифры, дающие в сумме 10 (например, 2 и 8, 4 и 6)</li>
+        </ul>
+        <p>Пара должна быть «рядом»: по горизонтали или вертикали, без других активных цифр между ними (уже зачёркнутые не мешают).</p>
+        <p>Выберите первую цифру (она подсветится), затем нажмите вторую — пара зачеркнётся. Меню «Продолжить» убирает пустые ряды и добавляет новые. Цель — зачеркнуть все цифры.</p>
+        ''',
+    })
+
+
+@require_GET
+def about_view(request):
+    return render(request, 'game/info_page.html', {
+        'title': 'Об игре',
+        'content': '''
+        <p><strong>цИфИрки</strong> — головоломка с цифрами в сетке 9×N.</p>
+        <p>Игра есть в двух вариантах: веб-версия (Django) и десктоп (tkinter, <code>main.py</code>).</p>
+        <p>Посвящается Томскому Государственному Университету, и конкретно группе 1174 ФПМК, 2002го года выпуска.</p>
+        ''',
+    })
+
+
+@require_GET
+def author_view(request):
+    return render(request, 'game/info_page.html', {
+        'title': 'Об авторе',
+        'content': '''
+        <p>Автор аутист</p>
+        ''',
+    })
+
+
 @ensure_csrf_cookie
 @require_GET
 def game_view(request):
@@ -60,7 +98,7 @@ def action_view(request):
         _save_state(request, texts, clicked, cancel)
         if SESSION_PROMPTED in request.session:
             del request.session[SESSION_PROMPTED]
-        messages.success(request, 'Игра начата заново.')
+        messages.success(request, 'Поехали.')
         return redirect('game:play')
 
     if action == 'continue':

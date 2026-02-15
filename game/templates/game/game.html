@@ -148,22 +148,28 @@
             gap: 0.5rem;
             justify-content: center;
         }
+        .menu.menu-info { margin-bottom: 1rem; }
+        .menu.menu-info a {
+            color: #7dcfff;
+            text-decoration: none;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 0.9rem;
+        }
+        .menu.menu-info a:hover { text-decoration: underline; }
         .menu form { display: inline; }
-        .menu button, .menu a.btn {
+        .menu button {
             display: inline-block;
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 8px;
             background: var(--surface);
             color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
             font-size: 0.9rem;
             cursor: pointer;
-            text-decoration: none;
             border: 1px solid var(--muted);
         }
-        .menu button:hover, .menu a.btn:hover {
-            background: #565f89;
-        }
+        .menu button:hover { background: #565f89; }
         .won {
             margin-top: 1rem;
             padding: 0.75rem 1rem;
@@ -175,7 +181,13 @@
     </style>
 </head>
 <body>
-    <h1>цИфИрки</h1>
+    <h1>многа цЫфЫр</h1>
+
+    <nav class="menu menu-info" aria-label="Информация">
+        <a href="{% url 'game:rules' %}">Правила игры</a>
+        <a href="{% url 'game:about' %}">Об игре</a>
+        <a href="{% url 'game:author' %}">Об авторе</a>
+    </nav>
 
     <nav class="menu" aria-label="Действия">
         <form method="post" action="{% url 'game:action' %}">
@@ -185,13 +197,13 @@
         </form>
         <form method="post" action="{% url 'game:action' %}">
             {% csrf_token %}
-            <input type="hidden" name="action" value="continue">
-            <button type="submit">Продолжить</button>
+            <input type="hidden" name="action" value="check_del">
+            <button type="submit">Проверить, есть ли что стереть</button>
         </form>
         <form method="post" action="{% url 'game:action' %}">
             {% csrf_token %}
-            <input type="hidden" name="action" value="check_del">
-            <button type="submit">Проверить, есть ли что стереть</button>
+            <input type="hidden" name="action" value="continue">
+            <button type="submit">Продолжить</button>
         </form>
         <form method="post" action="{% url 'game:action' %}">
             {% csrf_token %}
