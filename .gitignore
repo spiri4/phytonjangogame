@@ -32,6 +32,14 @@ env/
 *.swp
 *.swo
 
+# Django
+db.sqlite3
+*.log
+.env
+.env.local
+media/
+staticfiles/
+
 # OS
 .DS_Store
 Thumbs.db
